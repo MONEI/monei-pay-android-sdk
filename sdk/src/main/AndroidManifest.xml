@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Query for MONEI Pay (VIA_MONEI_PAY mode) and CloudCommerce (DIRECT mode) -->
+    <queries>
+        <intent>
+            <action android:name="com.monei.pay.ACCEPT_PAYMENT" />
+        </intent>
+        <package android:name="com.mastercard.cpos" />
+    </queries>
+
+    <application>
+        <activity
+            android:name="com.monei.pay.sdk.internal.PaymentActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="false" />
+    </application>
+
+</manifest>

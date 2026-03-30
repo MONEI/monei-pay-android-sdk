@@ -68,7 +68,7 @@ class PayloadBuilderTest {
         assertEquals("Android", customData.getString("os"))
         assertEquals("15", customData.getString("osVersion"))
         assertEquals("monei-pay-sdk", customData.getString("source"))
-        assertEquals("0.1.0", customData.getString("sourceVersion"))
+        assertEquals("0.2.0", customData.getString("sourceVersion"))
         assertEquals("Order #42", customData.getString("description"))
         assertEquals("John Doe", customData.getString("customerName"))
         assertEquals("john@example.com", customData.getString("customerEmail"))

@@ -39,6 +39,18 @@ afterEvaluate {
                 from(components["release"])
                 groupId = "com.monei"
                 artifactId = "monei-pay-sdk"
+                version =
+                    (System.getenv("VERSION") ?: "0.0.0-SNAPSHOT").removePrefix("v")
+            }
+        }
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/MONEI/monei-pay-android-sdk")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR") ?: ""
+                    password = System.getenv("GITHUB_TOKEN") ?: ""
+                }
             }
         }
     }

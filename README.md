@@ -14,7 +14,42 @@ Two integration modes:
 
 ## Installation
 
-Add the JitPack repository and dependency:
+### GitHub Packages (recommended)
+
+GitHub Packages Maven needs auth (PAT with `read:packages` or `GITHUB_TOKEN` in CI). Add to `gradle.properties`:
+
+```properties
+gpr.user=YOUR_GITHUB_USERNAME
+gpr.key=YOUR_GITHUB_TOKEN
+```
+
+```kotlin
+// settings.gradle.kts
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/MONEI/monei-pay-android-sdk")
+            credentials {
+                username = providers.gradleProperty("gpr.user")
+                    .orElse(providers.environmentVariable("GITHUB_ACTOR"))
+                    .get()
+                password = providers.gradleProperty("gpr.key")
+                    .orElse(providers.environmentVariable("GITHUB_TOKEN"))
+                    .get()
+            }
+        }
+    }
+}
+
+// app/build.gradle.kts
+dependencies {
+    implementation("com.monei:monei-pay-sdk:0.2.0")
+}
+```
+
+### JitPack (no auth)
 
 ```kotlin
 // settings.gradle.kts
@@ -75,47 +110,47 @@ try {
 
 Accepts an NFC payment. Suspending function — call from a coroutine.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `context` | `Context` | Yes | Activity or Application context |
-| `token` | `String` | Yes | Raw JWT auth token (no "Bearer " prefix) |
-| `amount` | `Int` | Yes | Amount in cents |
-| `description` | `String?` | No | Payment description |
-| `customerName` | `String?` | No | Customer name |
-| `customerEmail` | `String?` | No | Customer email |
-| `customerPhone` | `String?` | No | Customer phone |
-| `mode` | `PaymentMode` | No | `DIRECT` (default) or `VIA_MONEI_PAY` |
+| Parameter       | Type          | Required | Description                              |
+| --------------- | ------------- | -------- | ---------------------------------------- |
+| `context`       | `Context`     | Yes      | Activity or Application context          |
+| `token`         | `String`      | Yes      | Raw JWT auth token (no "Bearer " prefix) |
+| `amount`        | `Int`         | Yes      | Amount in cents                          |
+| `description`   | `String?`     | No       | Payment description                      |
+| `customerName`  | `String?`     | No       | Customer name                            |
+| `customerEmail` | `String?`     | No       | Customer email                           |
+| `customerPhone` | `String?`     | No       | Customer phone                           |
+| `mode`          | `PaymentMode` | No       | `DIRECT` (default) or `VIA_MONEI_PAY`    |
 
 Returns `PaymentResult`. Throws `MoneiPayException`.
 
 ### `PaymentResult`
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `transactionId` | `String` | Unique transaction ID |
-| `success` | `Boolean` | Whether payment was approved |
-| `amount` | `Int?` | Amount in cents |
-| `cardBrand` | `String?` | Card brand (visa, mastercard, etc.) |
-| `maskedCardNumber` | `String?` | Masked card number (****1234) |
+| Property           | Type      | Description                         |
+| ------------------ | --------- | ----------------------------------- |
+| `transactionId`    | `String`  | Unique transaction ID               |
+| `success`          | `Boolean` | Whether payment was approved        |
+| `amount`           | `Int?`    | Amount in cents                     |
+| `cardBrand`        | `String?` | Card brand (visa, mastercard, etc.) |
+| `maskedCardNumber` | `String?` | Masked card number (****1234)       |
 
 ### `PaymentMode`
 
-| Mode | Description |
-|------|-------------|
-| `DIRECT` | Launches CloudCommerce directly — no MONEI Pay needed |
-| `VIA_MONEI_PAY` | Launches MONEI Pay, which handles the NFC payment |
+| Mode            | Description                                           |
+| --------------- | ----------------------------------------------------- |
+| `DIRECT`        | Launches CloudCommerce directly — no MONEI Pay needed |
+| `VIA_MONEI_PAY` | Launches MONEI Pay, which handles the NFC payment     |
 
 ### `MoneiPayException`
 
-| Type | Description |
-|------|-------------|
-| `MoneiPayNotInstalled` | MONEI Pay not on device (VIA_MONEI_PAY mode) |
-| `CloudCommerceNotInstalled` | CloudCommerce not on device (DIRECT mode) |
-| `PaymentInProgress` | Another payment is active |
-| `PaymentCancelled` | User cancelled |
-| `PaymentFailed` | Payment declined/failed (has `reason` property) |
-| `InvalidParameters` | Invalid input parameters |
-| `InvalidToken` | Auth token expired or invalid |
+| Type                        | Description                                     |
+| --------------------------- | ----------------------------------------------- |
+| `MoneiPayNotInstalled`      | MONEI Pay not on device (VIA_MONEI_PAY mode)    |
+| `CloudCommerceNotInstalled` | CloudCommerce not on device (DIRECT mode)       |
+| `PaymentInProgress`         | Another payment is active                       |
+| `PaymentCancelled`          | User cancelled                                  |
+| `PaymentFailed`             | Payment declined/failed (has `reason` property) |
+| `InvalidParameters`         | Invalid input parameters                        |
+| `InvalidToken`              | Auth token expired or invalid                   |
 
 ## Example App
 

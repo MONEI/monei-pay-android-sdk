@@ -12,3 +12,7 @@ build/
 # Node (release-it tooling)
 node_modules/
 package-lock.json
+yarn.lock
+.yarn/
+.pnp.*
+.pnpm-store/

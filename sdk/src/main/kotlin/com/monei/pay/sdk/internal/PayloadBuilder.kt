@@ -79,7 +79,7 @@ internal object PayloadBuilder {
             put("os", "Android")
             put("osVersion", osVersion)
             put("source", "monei-pay-sdk")
-            put("sourceVersion", "0.1.0")
+            put("sourceVersion", "0.2.0")
             if (!description.isNullOrEmpty()) put("description", description)
             if (!customerName.isNullOrEmpty()) put("customerName", customerName)
             if (!customerEmail.isNullOrEmpty()) put("customerEmail", customerEmail)

@@ -8,3 +8,7 @@ build/
 .externalNativeBuild
 .cxx
 .kotlin/
+
+# Node (release-it tooling)
+node_modules/
+package-lock.json

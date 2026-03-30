@@ -158,8 +158,6 @@ internal class PaymentActivity : ComponentActivity() {
         return Intent(Intent.ACTION_VIEW).apply {
             data = Uri.parse(uri)
             setPackage(CLOUD_COMMERCE_PACKAGE)
-            addCategory(Intent.CATEGORY_DEFAULT)
-            addCategory(Intent.CATEGORY_BROWSABLE)
         }
     }
 

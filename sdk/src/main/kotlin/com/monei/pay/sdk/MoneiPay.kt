@@ -117,7 +117,7 @@ object MoneiPay {
             }
             PaymentMode.DIRECT -> {
                 val intent = Intent(Intent.ACTION_VIEW).apply {
-                    data = Uri.parse("cloud_payment://cloudcommerce/test")
+                    data = Uri.parse("cloud_payment://cloudcommerce/json:test")
                     setPackage(CLOUD_COMMERCE_PACKAGE)
                 }
                 if (!isActivityResolvable(context, intent)) {

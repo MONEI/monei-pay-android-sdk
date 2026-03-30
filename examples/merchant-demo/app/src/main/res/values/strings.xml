@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Merchant Demo</string>
+    <string name="amount_hint">Amount in cents (e.g. 1500 = 15.00 EUR)</string>
+    <string name="payment_mode_label">Payment Mode</string>
+    <string name="mode_direct">Direct</string>
+    <string name="mode_via_monei_pay">Via MONEI Pay</string>
+    <string name="accept_payment">Accept Payment</string>
+    <string name="how_it_works">This demo uses the MONEI Pay SDK to accept NFC payments:\n\n1. Enter your API key and POS ID, tap \"Get Token\"\n2. Enter amount, select mode, tap \"Accept Payment\"\n3. SDK handles payment via CloudCommerce (Direct) or MONEI Pay app\n4. SDK returns PaymentResult via coroutines\n\nNo special signing or entitlements needed.</string>
+</resources>

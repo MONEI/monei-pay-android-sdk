@@ -14,29 +14,25 @@ Two integration modes:
 
 ## Installation
 
-### Gradle (GitHub Packages)
-
-Add the repository and dependency:
+Add the JitPack repository and dependency:
 
 ```kotlin
 // settings.gradle.kts
 dependencyResolutionManagement {
     repositories {
-        maven {
-            url = uri("https://maven.pkg.github.com/MONEI/monei-pay-android-sdk")
-            credentials {
-                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_USER")
-                password = providers.gradleProperty("gpr.token").orNull ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
 // app/build.gradle.kts
 dependencies {
-    implementation("com.monei:monei-pay-sdk:0.1.0")
+    implementation("com.github.MONEI.monei-pay-android-sdk:sdk:v0.2.0")
 }
 ```
+
+[![](https://jitpack.io/v/MONEI/monei-pay-android-sdk.svg)](https://jitpack.io/#MONEI/monei-pay-android-sdk)
 
 ## Usage
 
@@ -120,6 +116,24 @@ Returns `PaymentResult`. Throws `MoneiPayException`.
 | `PaymentFailed` | Payment declined/failed (has `reason` property) |
 | `InvalidParameters` | Invalid input parameters |
 | `InvalidToken` | Auth token expired or invalid |
+
+## Example App
+
+The [`examples/merchant-demo/`](examples/merchant-demo/) directory contains a minimal Android app demonstrating the full payment flow:
+
+1. Enter your MONEI API key and optional POS ID
+2. Fetch a POS auth token
+3. Enter an amount and select payment mode (DIRECT or VIA_MONEI_PAY)
+4. Accept an NFC payment
+
+To run it:
+
+```bash
+cd examples/merchant-demo
+./gradlew assembleDebug
+```
+
+Then install on a device with NFC. The demo uses a local `includeBuild` reference to the SDK, so changes to the SDK are reflected immediately.
 
 ## Token Generation
 

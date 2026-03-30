@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Request MONEI Pay's payment permission (needed for VIA_MONEI_PAY mode) -->
+    <uses-permission android:name="com.monei.pay.permission.ACCEPT_PAYMENT" />
+
+    <!-- Declare that we query for MONEI Pay's intent and CloudCommerce (required on API 30+) -->
+    <queries>
+        <intent>
+            <action android:name="com.monei.pay.ACCEPT_PAYMENT" />
+        </intent>
+        <package android:name="com.mastercard.cpos" />
+    </queries>
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MerchantDemo">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

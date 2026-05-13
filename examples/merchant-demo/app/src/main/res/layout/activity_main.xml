@@ -34,6 +34,38 @@
                 android:textSize="12sp" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Account ID input (master account / partner integrations) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:hint="MONEI Account ID (optional, partner integrations)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/accountIdInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                android:fontFamily="monospace"
+                android:textSize="12sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- User-Agent input (partner identification) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:hint="User-Agent (e.g. MONEI/MyPartner/0.1.0)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/userAgentInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                android:fontFamily="monospace"
+                android:textSize="12sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- POS ID input -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"

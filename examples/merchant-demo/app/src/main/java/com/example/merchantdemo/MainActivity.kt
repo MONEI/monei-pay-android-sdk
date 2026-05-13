@@ -26,6 +26,10 @@ import java.net.URL
  */
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        private const val DEFAULT_USER_AGENT = "MONEI/MerchantDemoAndroid/0.2.1"
+    }
+
     private lateinit var binding: ActivityMainBinding
     private var authToken: String? = null
 
@@ -45,11 +49,20 @@ class MainActivity : AppCompatActivity() {
     private fun fetchToken() {
         val apiKey = binding.apiKeyInput.text.toString().trim()
         val posId = binding.posIdInput.text.toString().trim()
+        val accountId = binding.accountIdInput.text.toString().trim()
+        val userAgent = binding.userAgentInput.text.toString().trim()
 
         if (apiKey.isEmpty()) {
             Toast.makeText(this, "Enter API key", Toast.LENGTH_SHORT).show()
             return
         }
+
+        if (accountId.isNotEmpty() && userAgent.isEmpty()) {
+            Toast.makeText(this, "User-Agent must be provided when using Account ID", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val effectiveUserAgent = if (userAgent.isNotEmpty()) userAgent else DEFAULT_USER_AGENT
 
         binding.fetchTokenButton.isEnabled = false
         binding.tokenStatus.text = "Fetching token..."
@@ -63,6 +76,10 @@ class MainActivity : AppCompatActivity() {
                     conn.requestMethod = "POST"
                     conn.setRequestProperty("Authorization", apiKey)
                     conn.setRequestProperty("Content-Type", "application/json")
+                    conn.setRequestProperty("User-Agent", effectiveUserAgent)
+                    if (accountId.isNotEmpty()) {
+                        conn.setRequestProperty("MONEI-Account-ID", accountId)
+                    }
                     conn.doOutput = true
 
                     val body = JSONObject().apply {

@@ -25,7 +25,7 @@ import kotlinx.coroutines.sync.Mutex
  */
 object MoneiPay {
 
-    const val SDK_VERSION = "0.2.0"
+    const val SDK_VERSION = "1.0.0"
 
     private const val MONEI_PAY_ACTION = "com.monei.pay.ACCEPT_PAYMENT"
     private const val CLOUD_COMMERCE_PACKAGE = "com.mastercard.cpos"
@@ -46,6 +46,8 @@ object MoneiPay {
      * @param customerEmail Optional customer email.
      * @param customerPhone Optional customer phone.
      * @param mode Payment mode: [PaymentMode.DIRECT] (via CloudCommerce) or [PaymentMode.VIA_MONEI_PAY].
+     * @param callbackUrl Optional https webhook URL delivered as a signed MONEI webhook on completion.
+     *                    Trusted: use this for server-side order fulfillment.
      * @return [PaymentResult] with transaction details.
      * @throws [MoneiPayException] on failure.
      */
@@ -57,7 +59,8 @@ object MoneiPay {
         customerName: String? = null,
         customerEmail: String? = null,
         customerPhone: String? = null,
-        mode: PaymentMode = PaymentMode.DIRECT
+        mode: PaymentMode = PaymentMode.DIRECT,
+        callbackUrl: String? = null
     ): PaymentResult {
         if (!mutex.tryLock()) {
             throw MoneiPayException.PaymentInProgress()
@@ -80,6 +83,7 @@ object MoneiPay {
                 putExtra(PaymentActivity.EXTRA_CUSTOMER_EMAIL, customerEmail)
                 putExtra(PaymentActivity.EXTRA_CUSTOMER_PHONE, customerPhone)
                 putExtra(PaymentActivity.EXTRA_MODE, mode.name)
+                putExtra(PaymentActivity.EXTRA_CALLBACK_URL, callbackUrl)
                 if (context !is Activity) {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }

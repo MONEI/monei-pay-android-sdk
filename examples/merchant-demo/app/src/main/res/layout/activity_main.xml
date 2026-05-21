@@ -115,6 +115,22 @@
                 android:inputType="number" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- Callback URL input (optional signed webhook) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Callback URL (optional, https webhook)">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/callbackUrlInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textUri"
+                android:fontFamily="monospace"
+                android:textSize="12sp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
         <!-- Payment Mode selector -->
         <TextView
             android:layout_width="wrap_content"

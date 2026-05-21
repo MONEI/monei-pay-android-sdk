@@ -68,7 +68,7 @@ class PayloadBuilderTest {
         assertEquals("Android", customData.getString("os"))
         assertEquals("15", customData.getString("osVersion"))
         assertEquals("monei-pay-sdk", customData.getString("source"))
-        assertEquals("0.2.0", customData.getString("sourceVersion"))
+        assertEquals("1.0.0", customData.getString("sourceVersion"))
         assertEquals("Order #42", customData.getString("description"))
         assertEquals("John Doe", customData.getString("customerName"))
         assertEquals("john@example.com", customData.getString("customerEmail"))
@@ -211,5 +211,214 @@ class PayloadBuilderTest {
             osVersion = "14"
         )
         assertTrue(uri.startsWith("cloud_payment://cloudcommerce/json:"))
+    }
+
+    @Test
+    fun `buildPayloadJson includes callbackUrl in merchantCustomData when provided`() {
+        val payload = PayloadBuilder.buildPayloadJson(
+            token = "eyJtest",
+            amount = 1500,
+            accountId = "acc_123",
+            companyName = "Store",
+            mcc = "5999",
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            orderId = "ABC123DEF456",
+            locale = "en_US",
+            deviceModel = "Pixel",
+            osVersion = "14",
+            callbackUrl = "https://merchant.example.com/webhook"
+        )
+
+        val customData = payload.getJSONObject("merchantCustomData")
+        assertEquals("https://merchant.example.com/webhook", customData.getString("callbackUrl"))
+    }
+
+    @Test
+    fun `buildPayloadJson omits callbackUrl when null`() {
+        val payload = PayloadBuilder.buildPayloadJson(
+            token = "eyJtest",
+            amount = 1500,
+            accountId = "acc_123",
+            companyName = "Store",
+            mcc = "5999",
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            orderId = "ABC123DEF456",
+            locale = "en_US",
+            deviceModel = "Pixel",
+            osVersion = "14"
+        )
+
+        val customData = payload.getJSONObject("merchantCustomData")
+        assertFalse(customData.has("callbackUrl"))
+    }
+
+    @Test
+    fun `buildPayloadJson omits callbackUrl when empty string`() {
+        val payload = PayloadBuilder.buildPayloadJson(
+            token = "eyJtest",
+            amount = 1500,
+            accountId = "acc_123",
+            companyName = "Store",
+            mcc = "5999",
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            orderId = "ABC123DEF456",
+            locale = "en_US",
+            deviceModel = "Pixel",
+            osVersion = "14",
+            callbackUrl = ""
+        )
+
+        val customData = payload.getJSONObject("merchantCustomData")
+        assertFalse(customData.has("callbackUrl"))
+    }
+
+    @Test
+    fun `buildPayloadJson does not emit legacy callback key`() {
+        val payload = PayloadBuilder.buildPayloadJson(
+            token = "eyJtest",
+            amount = 1500,
+            accountId = "acc_123",
+            companyName = "Store",
+            mcc = "5999",
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            orderId = "ABC123DEF456",
+            locale = "en_US",
+            deviceModel = "Pixel",
+            osVersion = "14",
+            callbackUrl = "https://merchant.example.com/webhook"
+        )
+
+        val customData = payload.getJSONObject("merchantCustomData")
+        assertFalse(customData.has("callback"))
+        assertFalse(payload.has("callback"))
+    }
+
+    @Test
+    fun `buildMoneiPayExtras includes required fields and skips empty optional`() {
+        val extras = PayloadBuilder.buildMoneiPayExtras(
+            token = "eyJraw_token",
+            amount = 1500,
+            description = null,
+            customerName = "",
+            customerEmail = null,
+            customerPhone = null
+        )
+
+        assertEquals(1500, extras["amount_cents"])
+        assertEquals("eyJraw_token", extras["auth_token"])
+        assertFalse(extras.containsKey("description"))
+        assertFalse(extras.containsKey("customer_name"))
+        assertFalse(extras.containsKey("customer_email"))
+        assertFalse(extras.containsKey("customer_phone"))
+        assertFalse(extras.containsKey("callback_url"))
+    }
+
+    @Test
+    fun `buildMoneiPayExtras populates optional customer fields when present`() {
+        val extras = PayloadBuilder.buildMoneiPayExtras(
+            token = "eyJraw_token",
+            amount = 200,
+            description = "Order #42",
+            customerName = "John",
+            customerEmail = "j@example.com",
+            customerPhone = "+34600000000"
+        )
+
+        assertEquals("Order #42", extras["description"])
+        assertEquals("John", extras["customer_name"])
+        assertEquals("j@example.com", extras["customer_email"])
+        assertEquals("+34600000000", extras["customer_phone"])
+    }
+
+    @Test
+    fun `buildMoneiPayExtras includes callback_url when provided`() {
+        val extras = PayloadBuilder.buildMoneiPayExtras(
+            token = "t",
+            amount = 100,
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            callbackUrl = "https://merchant.example.com/webhook"
+        )
+
+        assertEquals("https://merchant.example.com/webhook", extras["callback_url"])
+    }
+
+    @Test
+    fun `buildMoneiPayExtras omits callback_url when null or empty`() {
+        val nullExtras = PayloadBuilder.buildMoneiPayExtras(
+            token = "t",
+            amount = 100,
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            callbackUrl = null
+        )
+        assertFalse(nullExtras.containsKey("callback_url"))
+
+        val emptyExtras = PayloadBuilder.buildMoneiPayExtras(
+            token = "t",
+            amount = 100,
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            callbackUrl = ""
+        )
+        assertFalse(emptyExtras.containsKey("callback_url"))
+    }
+
+    @Test
+    fun `buildMoneiPayExtras does not emit legacy callback key`() {
+        val extras = PayloadBuilder.buildMoneiPayExtras(
+            token = "t",
+            amount = 100,
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            callbackUrl = "https://merchant.example.com/webhook"
+        )
+        assertFalse(extras.containsKey("callback"))
+    }
+
+    @Test
+    fun `buildCloudCommerceUri encodes callbackUrl in base64 payload`() {
+        val uri = PayloadBuilder.buildCloudCommerceUri(
+            token = "eyJtest",
+            amount = 1500,
+            accountId = "acc_123",
+            companyName = "Store",
+            mcc = "5999",
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            orderId = "ABC123DEF456",
+            locale = "en_US",
+            deviceModel = "Pixel",
+            osVersion = "14",
+            callbackUrl = "https://merchant.example.com/webhook"
+        )
+
+        val base64 = uri.removePrefix("cloud_payment://cloudcommerce/json:")
+        val decoded = String(java.util.Base64.getDecoder().decode(base64), Charsets.UTF_8)
+        val payload = org.json.JSONObject(decoded)
+        val customData = payload.getJSONObject("merchantCustomData")
+        assertEquals("https://merchant.example.com/webhook", customData.getString("callbackUrl"))
     }
 }

@@ -27,7 +27,7 @@ import java.net.URL
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        private const val DEFAULT_USER_AGENT = "MONEI/MerchantDemoAndroid/0.2.1"
+        private const val DEFAULT_USER_AGENT = "MONEI/MerchantDemoAndroid/1.0.0"
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         val mode = if (binding.modeDirect.isChecked) PaymentMode.DIRECT else PaymentMode.VIA_MONEI_PAY
+        val callbackUrl = binding.callbackUrlInput.text.toString().trim().ifEmpty { null }
 
         binding.resultCard.visibility = android.view.View.GONE
         binding.progressIndicator.visibility = android.view.View.VISIBLE
@@ -138,7 +139,8 @@ class MainActivity : AppCompatActivity() {
                     context = this@MainActivity,
                     token = token,
                     amount = amount,
-                    mode = mode
+                    mode = mode,
+                    callbackUrl = callbackUrl
                 )
                 showResult(
                     success = result.success,

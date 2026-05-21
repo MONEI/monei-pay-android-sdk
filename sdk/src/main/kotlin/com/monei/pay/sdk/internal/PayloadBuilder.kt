@@ -26,7 +26,8 @@ internal object PayloadBuilder {
         orderId: String,
         locale: String,
         deviceModel: String,
-        osVersion: String
+        osVersion: String,
+        callbackUrl: String? = null
     ): String {
         val payload = buildPayloadJson(
             token = token,
@@ -41,7 +42,8 @@ internal object PayloadBuilder {
             orderId = orderId,
             locale = locale,
             deviceModel = deviceModel,
-            osVersion = osVersion
+            osVersion = osVersion,
+            callbackUrl = callbackUrl
         )
         val base64 = Base64.getEncoder().encodeToString(
             payload.toString().toByteArray(Charsets.UTF_8)
@@ -66,7 +68,8 @@ internal object PayloadBuilder {
         orderId: String,
         locale: String,
         deviceModel: String,
-        osVersion: String
+        osVersion: String,
+        callbackUrl: String? = null
     ): JSONObject {
         val bearerToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
 
@@ -79,11 +82,12 @@ internal object PayloadBuilder {
             put("os", "Android")
             put("osVersion", osVersion)
             put("source", "monei-pay-sdk")
-            put("sourceVersion", "0.2.0")
+            put("sourceVersion", "1.0.0")
             if (!description.isNullOrEmpty()) put("description", description)
             if (!customerName.isNullOrEmpty()) put("customerName", customerName)
             if (!customerEmail.isNullOrEmpty()) put("customerEmail", customerEmail)
             if (!customerPhone.isNullOrEmpty()) put("customerPhone", customerPhone)
+            if (!callbackUrl.isNullOrEmpty()) put("callbackUrl", callbackUrl)
         }
 
         return JSONObject().apply {
@@ -102,6 +106,32 @@ internal object PayloadBuilder {
             put("fullAccess", "false")
             put("locale", locale)
         }
+    }
+
+    /**
+     * Build the Intent-extra map for VIA_MONEI_PAY mode.
+     * Returns a Map of extra-name → value (Int or String). Caller writes to Intent.
+     * Pure-JVM helper so it's testable without Android instrumentation.
+     */
+    fun buildMoneiPayExtras(
+        token: String,
+        amount: Int,
+        description: String?,
+        customerName: String?,
+        customerEmail: String?,
+        customerPhone: String?,
+        callbackUrl: String? = null
+    ): Map<String, Any?> {
+        val extras = linkedMapOf<String, Any?>(
+            "amount_cents" to amount,
+            "auth_token" to token
+        )
+        if (!description.isNullOrEmpty()) extras["description"] = description
+        if (!customerName.isNullOrEmpty()) extras["customer_name"] = customerName
+        if (!customerEmail.isNullOrEmpty()) extras["customer_email"] = customerEmail
+        if (!customerPhone.isNullOrEmpty()) extras["customer_phone"] = customerPhone
+        if (!callbackUrl.isNullOrEmpty()) extras["callback_url"] = callbackUrl
+        return extras
     }
 
     fun generateOrderId(): String {

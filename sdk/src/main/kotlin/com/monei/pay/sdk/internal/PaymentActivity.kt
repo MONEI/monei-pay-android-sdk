@@ -25,6 +25,7 @@ internal class PaymentActivity : ComponentActivity() {
         const val EXTRA_CUSTOMER_EMAIL = "customer_email"
         const val EXTRA_CUSTOMER_PHONE = "customer_phone"
         const val EXTRA_MODE = "mode"
+        internal const val EXTRA_CALLBACK_URL = "callback_url"
 
         private const val MONEI_PAY_ACTION = "com.monei.pay.ACCEPT_PAYMENT"
         private const val CLOUD_COMMERCE_PACKAGE = "com.mastercard.cpos"
@@ -67,13 +68,14 @@ internal class PaymentActivity : ComponentActivity() {
         val customerName = intent.getStringExtra(EXTRA_CUSTOMER_NAME)
         val customerEmail = intent.getStringExtra(EXTRA_CUSTOMER_EMAIL)
         val customerPhone = intent.getStringExtra(EXTRA_CUSTOMER_PHONE)
+        val callbackUrl = intent.getStringExtra(EXTRA_CALLBACK_URL)
 
         val paymentIntent = when (mode) {
             PaymentMode.VIA_MONEI_PAY -> buildMoneiPayIntent(
-                token, amount, description, customerName, customerEmail, customerPhone
+                token, amount, description, customerName, customerEmail, customerPhone, callbackUrl
             )
             PaymentMode.DIRECT -> buildDirectIntent(
-                token, amount, description, customerName, customerEmail, customerPhone
+                token, amount, description, customerName, customerEmail, customerPhone, callbackUrl
             )
         }
 
@@ -97,15 +99,20 @@ internal class PaymentActivity : ComponentActivity() {
         description: String?,
         customerName: String?,
         customerEmail: String?,
-        customerPhone: String?
+        customerPhone: String?,
+        callbackUrl: String?
     ): Intent {
+        // raw JWT in auth_token — MONEI Pay handles Bearer prefix
+        val extras = PayloadBuilder.buildMoneiPayExtras(
+            token, amount, description, customerName, customerEmail, customerPhone, callbackUrl
+        )
         return Intent(MONEI_PAY_ACTION).apply {
-            putExtra("amount_cents", amount)
-            putExtra("auth_token", token) // raw JWT — MONEI Pay handles Bearer prefix
-            if (!description.isNullOrEmpty()) putExtra("description", description)
-            if (!customerName.isNullOrEmpty()) putExtra("customer_name", customerName)
-            if (!customerEmail.isNullOrEmpty()) putExtra("customer_email", customerEmail)
-            if (!customerPhone.isNullOrEmpty()) putExtra("customer_phone", customerPhone)
+            for ((k, v) in extras) {
+                when (v) {
+                    is Int -> putExtra(k, v)
+                    is String -> putExtra(k, v)
+                }
+            }
         }
     }
 
@@ -115,7 +122,8 @@ internal class PaymentActivity : ComponentActivity() {
         description: String?,
         customerName: String?,
         customerEmail: String?,
-        customerPhone: String?
+        customerPhone: String?,
+        callbackUrl: String?
     ): Intent? {
         val claims = JwtDecoder.decode(token)
         if (claims == null) {
@@ -152,7 +160,8 @@ internal class PaymentActivity : ComponentActivity() {
             orderId = orderId,
             locale = locale,
             deviceModel = Build.MODEL,
-            osVersion = Build.VERSION.RELEASE
+            osVersion = Build.VERSION.RELEASE,
+            callbackUrl = callbackUrl
         )
 
         return Intent(Intent.ACTION_VIEW).apply {

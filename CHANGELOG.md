@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.0](https://github.com/MONEI/monei-pay-android-sdk/compare/v0.2.2...v1.0.0) (2026-05-21)
+
+
+### Features
+
+* add optional `callbackUrl` parameter to `MoneiPay.acceptPayment()` for signed webhook delivery on payment completion (trusted server-side fulfillment channel, complementary to the sync `PaymentResult` return path)
+* thread `callbackUrl` through DIRECT (CloudCommerce `merchantCustomData`) and VIA_MONEI_PAY (intent extra `callback_url`) paths
+* bump `SDK_VERSION` and embedded `sourceVersion` to `1.0.0`
+
+
+### BREAKING CHANGES
+
+* coordinated v1.0 release across iOS / Android / React Native SDKs; aligns with monei-pay app v3.0 wire format (`callback_url` + `complete_url` replace legacy `callback` deep-link param)
+
 ## [0.2.2](https://github.com/MONEI/monei-pay-android-sdk/compare/v0.2.1...v0.2.2) (2026-05-13)
 
 

@@ -48,6 +48,10 @@ object MoneiPay {
      * @param mode Payment mode: [PaymentMode.DIRECT] (via CloudCommerce) or [PaymentMode.VIA_MONEI_PAY].
      * @param callbackUrl Optional https webhook URL delivered as a signed MONEI webhook on completion.
      *                    Trusted: use this for server-side order fulfillment.
+     * @param orderId Optional merchant order reference. Used as the payment's orderId for
+     *                reconciliation in the webhook callback. If empty, SDK generates a 12-hex one.
+     * @param transactionType Optional transaction type (SALE / AUTH / REFUND / CAPTURE / CANCEL /
+     *                        PAYOUT / VERIF). Backend validates; invalid values are rejected.
      * @return [PaymentResult] with transaction details.
      * @throws [MoneiPayException] on failure.
      */
@@ -60,7 +64,9 @@ object MoneiPay {
         customerEmail: String? = null,
         customerPhone: String? = null,
         mode: PaymentMode = PaymentMode.DIRECT,
-        callbackUrl: String? = null
+        callbackUrl: String? = null,
+        orderId: String? = null,
+        transactionType: String? = null
     ): PaymentResult {
         if (!mutex.tryLock()) {
             throw MoneiPayException.PaymentInProgress()
@@ -84,6 +90,8 @@ object MoneiPay {
                 putExtra(PaymentActivity.EXTRA_CUSTOMER_PHONE, customerPhone)
                 putExtra(PaymentActivity.EXTRA_MODE, mode.name)
                 putExtra(PaymentActivity.EXTRA_CALLBACK_URL, callbackUrl)
+                putExtra(PaymentActivity.EXTRA_ORDER_ID, orderId)
+                putExtra(PaymentActivity.EXTRA_TRANSACTION_TYPE, transactionType)
                 if (context !is Activity) {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }

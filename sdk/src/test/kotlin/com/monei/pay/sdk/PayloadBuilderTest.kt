@@ -396,6 +396,74 @@ class PayloadBuilderTest {
         assertFalse(extras.containsKey("callback"))
     }
 
+    // transactionType + merchant orderId surface in customData on the same path
+    // as callbackUrl. Backend mcc-service zod schema enforces enum validity for
+    // transactionType; SDK just passes through.
+    @Test
+    fun `buildPayloadJson includes transactionType in customData when provided`() {
+        val payload = PayloadBuilder.buildPayloadJson(
+            token = "eyJtest",
+            amount = 1500,
+            accountId = "acc_123",
+            companyName = "Store",
+            mcc = "5999",
+            description = null,
+            customerName = null,
+            customerEmail = null,
+            customerPhone = null,
+            orderId = "ABC123DEF456",
+            locale = "en_US",
+            deviceModel = "Pixel",
+            osVersion = "14",
+            transactionType = "AUTH"
+        )
+        val customData = payload.getJSONObject("merchantCustomData")
+        assertEquals("AUTH", customData.getString("transactionType"))
+    }
+
+    @Test
+    fun `buildPayloadJson omits transactionType when null or empty`() {
+        val nullPayload = PayloadBuilder.buildPayloadJson(
+            token = "t", amount = 1, accountId = "a", companyName = "S", mcc = "5999",
+            description = null, customerName = null, customerEmail = null, customerPhone = null,
+            orderId = "O", locale = "en_US", deviceModel = "Pixel", osVersion = "14",
+            transactionType = null
+        )
+        assertFalse(nullPayload.getJSONObject("merchantCustomData").has("transactionType"))
+
+        val emptyPayload = PayloadBuilder.buildPayloadJson(
+            token = "t", amount = 1, accountId = "a", companyName = "S", mcc = "5999",
+            description = null, customerName = null, customerEmail = null, customerPhone = null,
+            orderId = "O", locale = "en_US", deviceModel = "Pixel", osVersion = "14",
+            transactionType = ""
+        )
+        assertFalse(emptyPayload.getJSONObject("merchantCustomData").has("transactionType"))
+    }
+
+    @Test
+    fun `buildMoneiPayExtras maps orderId and transactionType to snake_case keys`() {
+        val extras = PayloadBuilder.buildMoneiPayExtras(
+            token = "t", amount = 100,
+            description = null, customerName = null, customerEmail = null, customerPhone = null,
+            orderId = "qmrid:abc-123",
+            transactionType = "SALE"
+        )
+        assertEquals("qmrid:abc-123", extras["order_id"])
+        assertEquals("SALE", extras["transaction_type"])
+    }
+
+    @Test
+    fun `buildMoneiPayExtras omits orderId and transactionType when null or empty`() {
+        val extras = PayloadBuilder.buildMoneiPayExtras(
+            token = "t", amount = 100,
+            description = null, customerName = null, customerEmail = null, customerPhone = null,
+            orderId = "",
+            transactionType = null
+        )
+        assertFalse(extras.containsKey("order_id"))
+        assertFalse(extras.containsKey("transaction_type"))
+    }
+
     @Test
     fun `buildCloudCommerceUri encodes callbackUrl in base64 payload`() {
         val uri = PayloadBuilder.buildCloudCommerceUri(

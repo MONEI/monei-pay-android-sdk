@@ -26,6 +26,8 @@ internal class PaymentActivity : ComponentActivity() {
         const val EXTRA_CUSTOMER_PHONE = "customer_phone"
         const val EXTRA_MODE = "mode"
         internal const val EXTRA_CALLBACK_URL = "callback_url"
+        internal const val EXTRA_ORDER_ID = "order_id"
+        internal const val EXTRA_TRANSACTION_TYPE = "transaction_type"
 
         private const val MONEI_PAY_ACTION = "com.monei.pay.ACCEPT_PAYMENT"
         private const val CLOUD_COMMERCE_PACKAGE = "com.mastercard.cpos"
@@ -69,13 +71,17 @@ internal class PaymentActivity : ComponentActivity() {
         val customerEmail = intent.getStringExtra(EXTRA_CUSTOMER_EMAIL)
         val customerPhone = intent.getStringExtra(EXTRA_CUSTOMER_PHONE)
         val callbackUrl = intent.getStringExtra(EXTRA_CALLBACK_URL)
+        val merchantOrderId = intent.getStringExtra(EXTRA_ORDER_ID)
+        val transactionType = intent.getStringExtra(EXTRA_TRANSACTION_TYPE)
 
         val paymentIntent = when (mode) {
             PaymentMode.VIA_MONEI_PAY -> buildMoneiPayIntent(
-                token, amount, description, customerName, customerEmail, customerPhone, callbackUrl
+                token, amount, description, customerName, customerEmail, customerPhone,
+                callbackUrl, merchantOrderId, transactionType
             )
             PaymentMode.DIRECT -> buildDirectIntent(
-                token, amount, description, customerName, customerEmail, customerPhone, callbackUrl
+                token, amount, description, customerName, customerEmail, customerPhone,
+                callbackUrl, merchantOrderId, transactionType
             )
         }
 
@@ -100,11 +106,14 @@ internal class PaymentActivity : ComponentActivity() {
         customerName: String?,
         customerEmail: String?,
         customerPhone: String?,
-        callbackUrl: String?
+        callbackUrl: String?,
+        merchantOrderId: String?,
+        transactionType: String?
     ): Intent {
         // raw JWT in auth_token — MONEI Pay handles Bearer prefix
         val extras = PayloadBuilder.buildMoneiPayExtras(
-            token, amount, description, customerName, customerEmail, customerPhone, callbackUrl
+            token, amount, description, customerName, customerEmail, customerPhone,
+            callbackUrl, merchantOrderId, transactionType
         )
         return Intent(MONEI_PAY_ACTION).apply {
             for ((k, v) in extras) {
@@ -123,7 +132,9 @@ internal class PaymentActivity : ComponentActivity() {
         customerName: String?,
         customerEmail: String?,
         customerPhone: String?,
-        callbackUrl: String?
+        callbackUrl: String?,
+        merchantOrderId: String?,
+        transactionType: String?
     ): Intent? {
         val claims = JwtDecoder.decode(token)
         if (claims == null) {
@@ -144,7 +155,7 @@ internal class PaymentActivity : ComponentActivity() {
 
         val companyName = claims.optString("company_name", "MONEI Pay")
         val mcc = claims.optString("mcc", "5999")
-        val orderId = PayloadBuilder.generateOrderId()
+        val orderId = if (!merchantOrderId.isNullOrEmpty()) merchantOrderId else PayloadBuilder.generateOrderId()
         val locale = PayloadBuilder.getDeviceLocale()
 
         val uri = PayloadBuilder.buildCloudCommerceUri(
@@ -161,7 +172,8 @@ internal class PaymentActivity : ComponentActivity() {
             locale = locale,
             deviceModel = Build.MODEL,
             osVersion = Build.VERSION.RELEASE,
-            callbackUrl = callbackUrl
+            callbackUrl = callbackUrl,
+            transactionType = transactionType
         )
 
         return Intent(Intent.ACTION_VIEW).apply {

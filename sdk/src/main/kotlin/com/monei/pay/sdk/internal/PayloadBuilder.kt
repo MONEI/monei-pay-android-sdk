@@ -27,7 +27,8 @@ internal object PayloadBuilder {
         locale: String,
         deviceModel: String,
         osVersion: String,
-        callbackUrl: String? = null
+        callbackUrl: String? = null,
+        transactionType: String? = null
     ): String {
         val payload = buildPayloadJson(
             token = token,
@@ -43,7 +44,8 @@ internal object PayloadBuilder {
             locale = locale,
             deviceModel = deviceModel,
             osVersion = osVersion,
-            callbackUrl = callbackUrl
+            callbackUrl = callbackUrl,
+            transactionType = transactionType
         )
         val base64 = Base64.getEncoder().encodeToString(
             payload.toString().toByteArray(Charsets.UTF_8)
@@ -69,7 +71,8 @@ internal object PayloadBuilder {
         locale: String,
         deviceModel: String,
         osVersion: String,
-        callbackUrl: String? = null
+        callbackUrl: String? = null,
+        transactionType: String? = null
     ): JSONObject {
         val bearerToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
 
@@ -88,6 +91,7 @@ internal object PayloadBuilder {
             if (!customerEmail.isNullOrEmpty()) put("customerEmail", customerEmail)
             if (!customerPhone.isNullOrEmpty()) put("customerPhone", customerPhone)
             if (!callbackUrl.isNullOrEmpty()) put("callbackUrl", callbackUrl)
+            if (!transactionType.isNullOrEmpty()) put("transactionType", transactionType)
         }
 
         return JSONObject().apply {
@@ -120,7 +124,9 @@ internal object PayloadBuilder {
         customerName: String?,
         customerEmail: String?,
         customerPhone: String?,
-        callbackUrl: String? = null
+        callbackUrl: String? = null,
+        orderId: String? = null,
+        transactionType: String? = null
     ): Map<String, Any?> {
         val extras = linkedMapOf<String, Any?>(
             "amount_cents" to amount,
@@ -131,6 +137,8 @@ internal object PayloadBuilder {
         if (!customerEmail.isNullOrEmpty()) extras["customer_email"] = customerEmail
         if (!customerPhone.isNullOrEmpty()) extras["customer_phone"] = customerPhone
         if (!callbackUrl.isNullOrEmpty()) extras["callback_url"] = callbackUrl
+        if (!orderId.isNullOrEmpty()) extras["order_id"] = orderId
+        if (!transactionType.isNullOrEmpty()) extras["transaction_type"] = transactionType
         return extras
     }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.0.0](https://github.com/MONEI/monei-pay-android-sdk/compare/v0.2.2...v1.0.0) (2026-05-22)
+
+
+### Features
+
+* Android SDK v1.0 — add callbackUrl param + wire to merchantCustomData ([da4ce16](https://github.com/MONEI/monei-pay-android-sdk/commit/da4ce16f1d2ac1d3bdf69a3bf59f473e20b695b8))
+
 ## [1.0.0](https://github.com/MONEI/monei-pay-android-sdk/compare/v0.2.2...v1.0.0) (2026-05-21)
 
 

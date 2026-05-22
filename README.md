@@ -119,6 +119,9 @@ Accepts an NFC payment. Suspending function — call from a coroutine.
 | `customerName`  | `String?`     | No       | Customer name                            |
 | `customerEmail` | `String?`     | No       | Customer email                           |
 | `customerPhone` | `String?`     | No       | Customer phone                           |
+| `callbackUrl`   | `String?`     | No       | HTTPS endpoint for the signed webhook. Trusted channel — use for fulfillment. Must be `https://`, max 2048 chars. |
+| `orderId`        | `String?`     | No       | Merchant order reference. Surfaced in the webhook callback for reconciliation. Max 2048 chars. If omitted, the SDK generates one. |
+| `transactionType`| `String?`     | No       | Optional: `SALE` (default), `AUTH`, `REFUND`, `CAPTURE`, `CANCEL`, `PAYOUT`, `VERIF`. Server-validated. |
 | `mode`          | `PaymentMode` | No       | `DIRECT` (default) or `VIA_MONEI_PAY`    |
 
 Returns `PaymentResult`. Throws `MoneiPayException`.

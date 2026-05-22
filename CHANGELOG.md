@@ -1,5 +1,12 @@
 # Changelog
 
+# [1.1.0](https://github.com/MONEI/monei-pay-android-sdk/compare/v1.0.0...v1.1.0) (2026-05-22)
+
+
+### Features
+
+* forward orderId and transactionType through SDK to customData ([410db65](https://github.com/MONEI/monei-pay-android-sdk/commit/410db65278d7d2660d4a70bd3bda32fae8b1da04))
+
 # [1.0.0](https://github.com/MONEI/monei-pay-android-sdk/compare/v0.2.2...v1.0.0) (2026-05-22)
 
 

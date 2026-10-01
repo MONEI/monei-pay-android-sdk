@@ -15,13 +15,15 @@ internal object ResponseParser {
     /**
      * Parse a MONEI Pay intent result (VIA_MONEI_PAY mode).
      * @param extras Map of intent extras with keys: transaction_id, success, amount,
-     *               card_brand, masked_card_number, error_code, error_message
+     *               card_brand, masked_card_number, order_id, currency, status, status_code,
+     *               status_message, authorization_code, last4, card_type, card_country,
+     *               error_code, error_message
      */
     fun parseMoneiPayResult(extras: Map<String, Any?>): PaymentResult {
         val errorCode = extras["error_code"] as? String
         if (!errorCode.isNullOrEmpty()) {
             val errorMessage = extras["error_message"] as? String
-            throwForErrorCode(errorCode, errorMessage)
+            throwForErrorCode(errorCode, errorMessage, extras)
         }
 
         val transactionId = extras["transaction_id"] as? String
@@ -29,12 +31,30 @@ internal object ResponseParser {
             throw MoneiPayException.PaymentFailed(reason = "Missing transaction_id in response")
         }
 
+        return moneiPayResult(transactionId, extras["success"] as? Boolean ?: false, extras)
+    }
+
+    private fun moneiPayResult(
+        transactionId: String,
+        success: Boolean,
+        extras: Map<String, Any?>
+    ): PaymentResult {
+        val maskedCardNumber = extras.stringOrNull("masked_card_number")
         return PaymentResult(
             transactionId = transactionId,
-            success = extras["success"] as? Boolean ?: false,
+            success = success,
             amount = extras["amount"] as? Int,
-            cardBrand = (extras["card_brand"] as? String)?.ifEmpty { null },
-            maskedCardNumber = (extras["masked_card_number"] as? String)?.ifEmpty { null }
+            cardBrand = extras.stringOrNull("card_brand"),
+            maskedCardNumber = maskedCardNumber,
+            orderId = extras.stringOrNull("order_id"),
+            currency = extras.stringOrNull("currency"),
+            status = extras.stringOrNull("status"),
+            statusCode = extras.stringOrNull("status_code"),
+            statusMessage = extras.stringOrNull("status_message"),
+            authorizationCode = extras.stringOrNull("authorization_code"),
+            last4 = extras.stringOrNull("last4") ?: last4Of(maskedCardNumber),
+            cardType = extras.stringOrNull("card_type"),
+            cardCountry = extras.stringOrNull("card_country")
         )
     }
 
@@ -89,16 +109,36 @@ internal object ResponseParser {
             throw MoneiPayException.PaymentFailed(reason = "No transaction ID in response")
         }
 
+        val maskedCardNumber = parsed.optString("maskedCardNumber", "").ifEmpty { null }
+        // Not in the deep link spec. Sent only when CloudCommerce forwards MONEI partner data.
+        val partnerData = parsed.optJSONObject("partnerDataMap")
         return PaymentResult(
             transactionId = transactionId,
             success = success,
             amount = requestedAmount,
             cardBrand = parsed.optString("cardBrandName", "").ifEmpty { null },
-            maskedCardNumber = parsed.optString("maskedCardNumber", "").ifEmpty { null }
+            maskedCardNumber = maskedCardNumber,
+            status = partnerData?.stringOrNull("status"),
+            statusCode = partnerData?.stringOrNull("statusCode"),
+            statusMessage = partnerData?.stringOrNull("statusMessage"),
+            authorizationCode = parsed.stringOrNull("authorizationCode"),
+            last4 = last4Of(maskedCardNumber),
+            cardType = partnerData?.stringOrNull("cardType"),
+            cardCountry = partnerData?.stringOrNull("cardCountry")
         )
     }
 
-    private fun throwForErrorCode(code: String, message: String?): Nothing {
+    private fun Map<String, Any?>.stringOrNull(key: String): String? =
+        (this[key] as? String)?.ifEmpty { null }
+
+    // Android org.json optString returns "null" for a JSON null, so check isNull first.
+    private fun JSONObject.stringOrNull(key: String): String? =
+        if (isNull(key)) null else optString(key).ifEmpty { null }
+
+    private fun last4Of(maskedCardNumber: String?): String? =
+        maskedCardNumber?.takeLast(4)?.takeIf { it.length == 4 && it.all(Char::isDigit) }
+
+    private fun throwForErrorCode(code: String, message: String?, extras: Map<String, Any?>): Nothing {
         when (code) {
             "USER_DENIED", "CANCELLED", "USER_CANCELLED" ->
                 throw MoneiPayException.PaymentCancelled()
@@ -108,6 +148,14 @@ internal object ResponseParser {
                 throw MoneiPayException.InvalidToken("Token expired")
             "INVALID_TOKEN" ->
                 throw MoneiPayException.InvalidToken(message ?: "Invalid token")
+            "PAYMENT_FAILED" -> {
+                val transactionId = extras["transaction_id"] as? String
+                throw MoneiPayException.PaymentFailed(
+                    reason = message ?: code,
+                    payment = transactionId?.ifEmpty { null }
+                        ?.let { moneiPayResult(it, success = false, extras) }
+                )
+            }
             else ->
                 throw MoneiPayException.PaymentFailed(reason = message ?: code)
         }

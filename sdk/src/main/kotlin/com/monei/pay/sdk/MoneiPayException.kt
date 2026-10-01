@@ -23,8 +23,15 @@ sealed class MoneiPayException(message: String) : Exception(message) {
     /** The payment was cancelled by the user. */
     class PaymentCancelled : MoneiPayException("Payment was cancelled.")
 
-    /** The payment was declined or failed. */
-    class PaymentFailed(val reason: String? = null) : MoneiPayException(
+    /**
+     * The payment was declined or failed.
+     * [payment] holds the declined payment data (id, status, reason, card) when MONEI Pay
+     * sends it, so you can show why the payment was declined.
+     */
+    class PaymentFailed(
+        val reason: String? = null,
+        val payment: PaymentResult? = null
+    ) : MoneiPayException(
         if (reason != null) "Payment failed: $reason" else "Payment failed."
     )
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* `PaymentResult` has new optional fields: `orderId`, `currency`, `status`, `statusCode`, `statusMessage`, `authorizationCode`, `last4`, `cardType`, `cardCountry`. All default to `null`. Existing constructor calls and destructuring still compile.
+* `VIA_MONEI_PAY` mode reads the new MONEI Pay result extras: `order_id`, `currency`, `status`, `status_code`, `status_message`, `authorization_code`, `last4`, `card_type`, `card_country`. If `last4` is missing, the SDK takes it from `masked_card_number`.
+* `MoneiPayException.PaymentFailed` has a new optional `payment` property. On a decline (`PAYMENT_FAILED`), it holds the declined payment data (id, status, reason, card).
+* `DIRECT` mode maps `authorizationCode`, `last4` and, when present, the `partnerDataMap` fields from the CloudCommerce response.
+* Empty strings become `null`. `success` alone tells if the payment is approved.
+* `PaymentResult` is display data only. Confirm the payment on your server (signed webhook or `GET /payments/{id}`) before fulfillment.
+
 # [1.1.0](https://github.com/MONEI/monei-pay-android-sdk/compare/v1.0.0...v1.1.0) (2026-05-22)
 
 

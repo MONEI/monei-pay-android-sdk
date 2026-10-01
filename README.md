@@ -99,6 +99,9 @@ try {
     // User cancelled
 } catch (e: MoneiPayException.InvalidToken) {
     // Token expired or invalid — refresh from backend
+} catch (e: MoneiPayException.PaymentFailed) {
+    // Declined. e.payment has the decline data when MONEI Pay sends it.
+    println("Payment declined: ${e.payment?.statusMessage ?: e.reason}")
 } catch (e: MoneiPayException) {
     println("Payment failed: ${e.message}")
 }
@@ -135,6 +138,24 @@ Returns `PaymentResult`. Throws `MoneiPayException`.
 | `amount`           | `Int?`    | Amount in cents                     |
 | `cardBrand`        | `String?` | Card brand (visa, mastercard, etc.) |
 | `maskedCardNumber` | `String?` | Masked card number (****1234)       |
+| `orderId`           | `String?` | Merchant order reference |
+| `currency`          | `String?` | ISO 4217 currency code (`EUR`) |
+| `status`            | `String?` | MONEI payment status (`SUCCEEDED`, `AUTHORIZED`, `FAILED`, ...) |
+| `statusCode`        | `String?` | MONEI status code (`E000`, `E301`, ...) |
+| `statusMessage`     | `String?` | MONEI status message (`Insufficient funds`) |
+| `authorizationCode` | `String?` | Issuer authorization code. Approved payments only. |
+| `last4`             | `String?` | Last 4 digits of the card |
+| `cardType`          | `String?` | `credit`, `debit` or `prepaid` |
+| `cardCountry`       | `String?` | Card country, ISO 3166-1 alpha-2 (`ES`) |
+
+The new fields are optional. A field is `null` when the payment app does not send it:
+
+- `VIA_MONEI_PAY`: MONEI Pay sends the fields. Older MONEI Pay versions do not send them.
+- `DIRECT`: the SDK reads `authorizationCode` and `last4` from the CloudCommerce response. It reads `status`, `statusCode`, `statusMessage`, `cardType` and `cardCountry` only when the response has a `partnerDataMap` object. `orderId` and `currency` are always `null`.
+
+Use `success` to know if the payment is approved. Do not use `status` or `statusCode` for this.
+
+> **Important:** `PaymentResult` is display data only. Before you fulfill the order, confirm the payment on your server with the signed webhook (`callbackUrl`) or `GET /payments/{id}`.
 
 ### `PaymentMode`
 
@@ -151,7 +172,7 @@ Returns `PaymentResult`. Throws `MoneiPayException`.
 | `CloudCommerceNotInstalled` | CloudCommerce not on device (DIRECT mode)       |
 | `PaymentInProgress`         | Another payment is active                       |
 | `PaymentCancelled`          | User cancelled                                  |
-| `PaymentFailed`             | Payment declined/failed (has `reason` property) |
+| `PaymentFailed`             | Payment declined/failed (has `reason` property). On a decline in `VIA_MONEI_PAY` mode, `payment` has the declined `PaymentResult` (id, status, reason, card) when MONEI Pay sends it. |
 | `InvalidParameters`         | Invalid input parameters                        |
 | `InvalidToken`              | Auth token expired or invalid                   |
 

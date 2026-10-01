@@ -207,13 +207,28 @@ internal class PaymentActivity : ComponentActivity() {
             throw MoneiPayException.PaymentCancelled()
         }
 
+        val extras = mapOf<String, Any?>(
+            "transaction_id" to data.getStringExtra("transaction_id"),
+            "success" to data.getBooleanExtra("success", false),
+            "amount" to data.takeIf { it.hasExtra("amount") }?.getIntExtra("amount", 0),
+            "card_brand" to data.getStringExtra("card_brand"),
+            "masked_card_number" to data.getStringExtra("masked_card_number"),
+            "order_id" to data.getStringExtra("order_id"),
+            "currency" to data.getStringExtra("currency"),
+            "status" to data.getStringExtra("status"),
+            "status_code" to data.getStringExtra("status_code"),
+            "status_message" to data.getStringExtra("status_message"),
+            "authorization_code" to data.getStringExtra("authorization_code"),
+            "last4" to data.getStringExtra("last4"),
+            "card_type" to data.getStringExtra("card_type"),
+            "card_country" to data.getStringExtra("card_country"),
+            "error_code" to data.getStringExtra("error_code"),
+            "error_message" to data.getStringExtra("error_message")
+        )
+
         // Check for error extras even on RESULT_CANCELED
         val errorCode = data.getStringExtra("error_code")
         if (!errorCode.isNullOrEmpty()) {
-            val extras = mapOf<String, Any?>(
-                "error_code" to errorCode,
-                "error_message" to data.getStringExtra("error_message")
-            )
             return ResponseParser.parseMoneiPayResult(extras)
         }
 
@@ -221,15 +236,6 @@ internal class PaymentActivity : ComponentActivity() {
             throw MoneiPayException.PaymentCancelled()
         }
 
-        val extras = mapOf<String, Any?>(
-            "transaction_id" to data.getStringExtra("transaction_id"),
-            "success" to data.getBooleanExtra("success", false),
-            "amount" to data.getIntExtra("amount", 0),
-            "card_brand" to data.getStringExtra("card_brand"),
-            "masked_card_number" to data.getStringExtra("masked_card_number"),
-            "error_code" to data.getStringExtra("error_code"),
-            "error_message" to data.getStringExtra("error_message")
-        )
         return ResponseParser.parseMoneiPayResult(extras)
     }
 

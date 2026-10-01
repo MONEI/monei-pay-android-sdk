@@ -6,7 +6,7 @@ package com.monei.pay.sdk
  * Display data only. Confirm the payment on your server (signed webhook or
  * `GET /payments/{id}`) before fulfillment.
  */
-data class PaymentResult(
+data class PaymentResult @JvmOverloads constructor(
     /** Unique transaction identifier. */
     val transactionId: String,
     /** Whether the payment was approved. */

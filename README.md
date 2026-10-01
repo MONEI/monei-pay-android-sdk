@@ -45,7 +45,7 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts
 dependencies {
-    implementation("com.monei:monei-pay-sdk:0.2.0")
+    implementation("com.monei:monei-pay-sdk:1.1.0")
 }
 ```
 
@@ -63,7 +63,7 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts
 dependencies {
-    implementation("com.github.MONEI.monei-pay-android-sdk:sdk:v0.2.0")
+    implementation("com.github.MONEI.monei-pay-android-sdk:sdk:v1.1.0")
 }
 ```
 

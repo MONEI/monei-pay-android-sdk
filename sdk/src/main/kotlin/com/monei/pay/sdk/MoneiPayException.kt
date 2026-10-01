@@ -28,7 +28,7 @@ sealed class MoneiPayException(message: String) : Exception(message) {
      * [payment] holds the declined payment data (id, status, reason, card) when MONEI Pay
      * sends it, so you can show why the payment was declined.
      */
-    class PaymentFailed(
+    class PaymentFailed @JvmOverloads constructor(
         val reason: String? = null,
         val payment: PaymentResult? = null
     ) : MoneiPayException(
